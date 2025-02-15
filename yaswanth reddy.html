@@ -1,11 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: white;
+            color: black;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            background-color: #f9f9f9;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .expense-list {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .total-expense {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .budget-alert {
+            color: red;
+            font-weight: bold;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1> Hello s.yaswanth reddy 23bds0245</h1>
+
+    <h1>PaisaWise - Expense Tracker</h1>
+    <div class="container">
+        <h2>Set Your Monthly Budget</h2>
+        <input type="number" id="budget" placeholder="Enter Monthly Budget (₹)" oninput="updateBudget()">
+        <p class="budget-alert" id="budgetAlert"></p>
+
+        <h2>Select Your Category</h2>
+        <select id="userType" onchange="updateExpenseOptions()">
+            <option value="student">Student</option>
+            <option value="employee">Employee</option>
+            <option value="entrepreneur">Entrepreneur</option>
+        </select>
+
+        <h2>Track Your Expenses</h2>
+        <select id="expenseType"></select>
+        <input type="number" id="amount" placeholder="Enter Amount">
+        <button onclick="addExpense()">Add Expense</button>
+
+        <div class="expense-list">
+            <h3>Expense List</h3>
+            <ul id="expenseList"></ul>
+            <p class="total-expense">Total Spent: ₹<span id="totalExpense">0</span></p>
+        </div>
+
+        <canvas id="expenseChart"></canvas>
+    </div>
+
+    <script>
+        let expenses = [];
+        let totalExpense = 0;
+        let budgetLimit = 0;
+
+        // Expense categories
+        const expenseCategories = {
+            student: ["Books", "Food", "Transport", "Entertainment", "Tuition Fees"],
+            employee: ["Rent", "Transport", "Food", "Utilities", "Savings"],
+            entrepreneur: ["Business Investment", "Marketing", "Employee Salaries", "Office Rent", "Networking"]
+        };
+
+        // Chart setup
+        let chart;
+        function initChart() {
+            let ctx = document.getElementById("expenseChart").getContext("2d");
+            chart = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "Expenses",
+                        data: [],
+                        backgroundColor: ["#ff6384", "#36a2eb", "#ffce56", "#4bc0c0", "#9966ff"]
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        // Update expense options
+        function updateExpenseOptions() {
+            let userType = document.getElementById("userType").value;
+            let expenseTypeDropdown = document.getElementById("expenseType");
+            expenseTypeDropdown.innerHTML = "";
+            expenseCategories[userType].forEach(category => {
+                let option = document.createElement("option");
+                option.value = category;
+                option.textContent = category;
+                expenseTypeDropdown.appendChild(option);
+            });
+        }
+
+        updateExpenseOptions();
+        initChart();
+
+        // Update budget
+        function updateBudget() {
+            budgetLimit = parseFloat(document.getElementById("budget").value) || 0;
+            checkBudget();
+        }
+
+        // Check if expenses exceed budget
+        function checkBudget() {
+            let budgetAlert = document.getElementById("budgetAlert");
+            if (budgetLimit > 0 && totalExpense > budgetLimit) {
+                budgetAlert.textContent = "⚠️ You have exceeded your budget!";
+            } else {
+                budgetAlert.textContent = "";
+            }
+        }
+
+        // Add expense
+        function addExpense() {
+            let expenseType = document.getElementById("expenseType").value;
+            let amount = parseFloat(document.getElementById("amount").value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount!");
+                return;
+            }
+
+            // Add expense
+            expenses.push({ type: expenseType, amount: amount });
+            totalExpense += amount;
+
+            // Update UI
+            let listItem = document.createElement("li");
+            listItem.textContent = `${expenseType}: ₹${amount}`;
+            document.getElementById("expenseList").appendChild(listItem);
+            document.getElementById("totalExpense").textContent = totalExpense;
+
+            checkBudget();
+            updateChart();
+            document.getElementById("amount").value = "";
+        }
+
+        // Update the pie chart
+        function updateChart() {
+            let expenseMap = {};
+            expenses.forEach(expense => {
+                if (expenseMap[expense.type]) {
+                    expenseMap[expense.type] += expense.amount;
+                } else {
+                    expenseMap[expense.type] = expense.amount;
+                }
+            });
+
+            chart.data.labels = Object.keys(expenseMap);
+            chart.data.datasets[0].data = Object.values(expenseMap);
+            chart.update();
+        }
+    </script>
+
 </body>
 </html>
