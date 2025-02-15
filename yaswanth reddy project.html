@@ -1,0 +1,49 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>PaisaWise - Expense Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+        .container { width: 50%; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); animation: fadeIn 1s; }
+        h1 { color: #333; } form { margin: 20px 0; }
+        select, input, button { padding: 10px; margin: 5px; }
+        canvas { margin-top: 20px; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .login-box { background: white; padding: 20px; width: 300px; margin: auto; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); }
+        .login-box input, .login-box button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .login-box button { background: #28a745; color: white; border: none; font-size: 16px; cursor: pointer; }
+        .login-box button:hover { background: #218838; }
+    </style>
+</head>
+<body>
+
+    <?php if (!isset($_SESSION['user_id'])) { ?>
+        <div class="login-box">
+            <h2>Login / Signup</h2>
+            <form method="POST">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    <?php } else { ?>
+        <div class="container">
+            <h1>Expense Tracker</h1>
+            <form method="POST">
+                <select name="category">
+                    <option value="Food">Food</option>
+                    <option value="Rent">Rent</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Entertainment">Entertainment</option>
+                </select>
+                <input type="number" name="amount" placeholder="Enter amount" required>
+                <button type="submit">Add Expense</button>
+            </form>
+            <canvas id="expenseChart"></canvas>
+            <br><a href="logout.php" style="text-decoration: none; color: red;">Logout</a>
+        </div>
+
+        <script>
+            const categories = <?php echo json_encod
